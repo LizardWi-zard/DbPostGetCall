@@ -1,5 +1,7 @@
 ﻿using Dapper;
+using Newtonsoft.Json;
 using Npgsql;
+using System.Xml;
 
 namespace DbPostGetCall
 {
@@ -12,19 +14,56 @@ namespace DbPostGetCall
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public async Task<string[]> GetCarModels()
+        public async Task<string> GetCars()
         {
-            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
+            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("ConnectionStrings:ConnectionString"));
 
-            var carModels = await connection.QueryAsync<string>("SELECT CarModel FROM ParkingLots GROUP BY Id");
+            //var connection = new SqlConnection(ConfigurationManager.ConnectionStrings[nameOfString].ConnectionString);
 
-            if (carModels == null)
+            var cars = await connection.QueryAsync<string>("SELECT json_agg(parkingLots) FROM parkingLots");
+
+            if (cars == null)
             {
-                return new string[] { "Null or empty" };
+                return "Null or empty";
             }
 
-            return carModels.ToArray();
+            return cars.ToArray()[0];
         }
+
+
+        public async Task<bool> RemoveCarFromLot(int idToDelete)
+        {
+            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("ConnectionStrings:ConnectionString"));
+
+            var affected = await connection.ExecuteAsync("DELETE FROM ParkingLots WHERE Id  = @Id ",
+                new { Id = idToDelete });
+
+            if (affected == 0)
+                return false;
+
+            return true;
+        }
+
+        public async Task<bool> PostCarLot(ParkingLot lot)
+        {
+            
+
+          // string sqlcarInsert = $"INSERT INTO ParkingLots (Id, CarModel, CarNumber, LotNumber) VALUES (@Id, @CarModel, @CarNumber, @LotNumber)";
+
+            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("ConnectionStrings:ConnectionString"));
+
+            var affected = await connection.ExecuteAsync("INSERT INTO ParkingLots (Id, CarModel, CarNumber, LotNumber) VALUES (@Id, @CarModel, @CarNumber, @LotNumber)",
+                            new { lot.Id, lot.CarModel, lot.CarNumber, lot.LotNumber});
+
+            if (affected == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+}
 
         //public async Task<ParkingLot> GetTakenLot(int id)
         //{
@@ -39,39 +78,3 @@ namespace DbPostGetCall
         //
         //    return (ParkingLot)car;
         //}
-
-        public async Task<bool> RemoveCarFromLot(int parkingLot)
-        {
-            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-
-            var affected = await connection.ExecuteAsync("DELETE FROM ParkingLots WHERE LotNumber  = @LotNumber ",
-                new { LotNumber = parkingLot });
-
-            if (affected == 0)
-                return false;
-
-            return true;
-        }
-
-        public async Task<bool> PostCarLot()
-        {
-            int Id = Random.Shared.Next(1, 100);
-            string CarModel = "Nissan";
-            int CarNumber = Random.Shared.Next(1000, 10000);
-            int LotNumber = Random.Shared.Next(1, 2000);
-
-            string sqlcarInsert = $"INSERT INTO ParkingLots (Id, CarModel, CarNumber, LotNumber) VALUES ({Id}, {CarModel}, {CarNumber}, {LotNumber})";
-
-            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-
-            var affected = await connection.ExecuteAsync(sqlcarInsert);
-
-            if (affected == 0)
-            {
-                return false;
-            }
-
-            return true;
-        }
-    }
-}

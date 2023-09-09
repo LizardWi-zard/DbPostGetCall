@@ -19,26 +19,40 @@ namespace DbPostGetCall.Controllers
             _getLot = getLot ?? throw new ArgumentNullException(nameof(getLot));
         }
 
-        [HttpGet(Name = "GetCarModels")]
-        public async Task<ActionResult<string>> GetCarModels()
+        [HttpGet(Name = "Cars")]
+        public async Task<ActionResult<string>> GetCars()
         {
-            var models = await _getLot.GetCarModels();
+            Console.WriteLine("Get another method call");
+
+
+            var models = await _getLot.GetCars();
             return Ok(models);
         }
 
-        [HttpPost(Name = "AddItemsToDB")]
+        [HttpPost(Name = "ItemsToDB")]
         public async Task<ActionResult<bool>> AddCarToDb()
         {
-            await _getLot.PostCarLot();
+            int newCarId = Random.Shared.Next(1, 100);
+            string newCarModel = "Honda";
+            int newCarNumber = Random.Shared.Next(1000, 10000);
+            int newLotNumber = Random.Shared.Next(1, 2000);
+
+            ParkingLot newLot = new ParkingLot();
+            newLot.Id = newCarId;
+            newLot.CarModel = newCarModel;
+            newLot.CarNumber = newCarNumber;
+            newLot.LotNumber = newLotNumber;
+
+            await _getLot.PostCarLot(newLot);
             return true;
 
         }
 
-        [HttpDelete("{parlingLot}", Name = "DeleteCar")]
+        [HttpDelete("{carId}", Name = "DeleteCar")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<bool>> DeleteDiscount(int parlingLot)
+        public async Task<ActionResult<bool>> DeleteDiscount(int carId)
         {
-            return Ok(await _getLot.RemoveCarFromLot(parlingLot));
+            return Ok(await _getLot.RemoveCarFromLot(carId));
         }
 
     }
