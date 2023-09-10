@@ -52,7 +52,6 @@ namespace DbPostGetCall.Controllers
         }
 
         [HttpDelete("{carId}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<HttpStatusCode>> DeleteDiscount(int carId)
         {
             var response = await _getLot.RemoveCarFromLot(carId);

@@ -39,6 +39,5 @@ namespace WebAppCaller.Controllers
 
             return response.Status;
         }
-
     }
 }

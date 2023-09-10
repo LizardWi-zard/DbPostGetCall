@@ -15,7 +15,6 @@ namespace DbPostGetCall
         const string sqlDeleteCall = "DELETE FROM ParkingLots WHERE Id  = @Id ";
         const string postNewLotCall = "INSERT INTO ParkingLots (Id, CarModel, CarNumber, LotNumber) VALUES (@Id, @CarModel, @CarNumber, @LotNumber)";
 
-
         private readonly IConfiguration _configuration;
 
         public LotGetter(IConfiguration configuration)
@@ -75,7 +74,6 @@ namespace DbPostGetCall
         public async Task<MyResponse> RemoveCarFromLot(int idToDelete)
         {
             using var connection = new NpgsqlConnection(_configuration.GetValue<string>(connectionString));
-
 
             var affected = await connection.ExecuteAsync(sqlDeleteCall,
                 new { Id = idToDelete });
