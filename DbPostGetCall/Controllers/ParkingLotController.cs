@@ -21,43 +21,43 @@ namespace DbPostGetCall.Controllers
             _getLot = getLot ?? throw new ArgumentNullException(nameof(getLot));
         }
 
-        [HttpGet(Name = "All")]
+        [HttpGet]
         public async Task<ActionResult<string>> GetCars()
         {
-            var models = await _getLot.GetCars();
-            return models;
+            var response = await _getLot.GetCars();
+
+            string output = (string)response.Data;
+
+            return output;
         }
 
-        [HttpGet("{carId}", Name = "Single")]
+        [HttpGet("{carId}")]
         public async Task<ActionResult<string>> GetCar(int carId)
         {
-            var models = await _getLot.GetTakenLot(carId);
-            return Ok(models);
-        }
+            var response = await _getLot.GetTakenLot(carId);
 
-        //[HttpPost()]
-        //public async Task<OkResult> AddCarToDb(int id, string model, int carNumber, int lotNumber)
-        //{
-        //    var newLot = new ParkingLot() { Id = id, CarModel = model, CarNumber = carNumber, LotNumber = lotNumber };
-        //
-        //    await _getLot.PostCarLot(newLot);
-        //    return Ok();
-        //}
+            string output = (string)response.Data;
+
+            return output;
+        }
 
         [HttpPost()]
-        public async Task<OkResult> AddCarToDb(string json)
+        public async Task<ActionResult<HttpStatusCode>> AddCarToDb(string json)
         {
-            ParkingLot newLot = JsonConvert.DeserializeObject<ParkingLot>(json);
+            ParkingLot newLot = JsonConvert.DeserializeObject<ParkingLot>(json) ?? new ParkingLot();
 
-            await _getLot.PostCarLot(newLot);
-            return Ok();
+            var response = await _getLot.PostCarLot(newLot);
+
+            return response.Status;
         }
 
-        [HttpDelete("{carId}", Name = "Delete")]
+        [HttpDelete("{carId}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<bool>> DeleteDiscount(int carId)
+        public async Task<ActionResult<HttpStatusCode>> DeleteDiscount(int carId)
         {
-            return Ok(await _getLot.RemoveCarFromLot(carId));
+            var response = await _getLot.RemoveCarFromLot(carId);
+
+            return response.Status;
         }
     }
 }

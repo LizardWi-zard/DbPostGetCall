@@ -14,7 +14,7 @@ namespace WebAppCaller.Controllers
     {
         private static readonly string[] Models = new[]
         {
-        "BMW", "Dodge", "Toyota", "Mercedes", "Volkswagen", "Reno", "Mazda"
+            "BMW", "Dodge", "Toyota", "Mercedes", "Volkswagen", "Reno", "Mazda"
         };
 
         private readonly ILogger<ResponseController> _logger;
@@ -22,14 +22,6 @@ namespace WebAppCaller.Controllers
         public ResponseController(ILogger<ResponseController> logger)
         {
             _logger = logger;
-        }
-
-        [HttpGet(Name = "GetCall")]
-        public async Task<ActionResult<string>> GetCars()
-        {
-            var models = await AskForCars();
-            
-            return Ok(models);
         }
 
         public static async Task<string> AskForCars()
@@ -51,15 +43,7 @@ namespace WebAppCaller.Controllers
 
             return "call failed";
         }
-
-        [HttpPost(Name = "GetCall")]
-        public async Task<OkResult> AddCar()
-        {
-            await AddToAllCars();
-
-            return Ok();
-        }
-
+      
         public static async Task<bool> AddToAllCars()
         {
             ParkingLot newLot = new ParkingLot();
@@ -84,5 +68,22 @@ namespace WebAppCaller.Controllers
 
             return false;
         }
+
+        [HttpGet(Name = "GetCall")]
+        public async Task<ActionResult<string>> GetCars()
+        {
+            var models = await AskForCars();
+
+            return Ok(models);
+        }
+
+        [HttpPost(Name = "GetCall")]
+        public async Task<OkResult> AddCar()
+        {
+            await AddToAllCars();
+
+            return Ok();
+        }
+
     }
 }

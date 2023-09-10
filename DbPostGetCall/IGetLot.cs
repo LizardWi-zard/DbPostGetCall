@@ -4,12 +4,12 @@ namespace DbPostGetCall
 {
     public interface IGetLot
     {
-        Task<string> GetCars();
+        Task<MyResponse> GetCars();
      
-        Task<string> GetTakenLot(int Id);
+        Task<MyResponse> GetTakenLot(int Id);
         
-        Task<bool> RemoveCarFromLot(int parkingLot);
+        Task<MyResponse> RemoveCarFromLot(int parkingLot);
         
-        Task<bool> PostCarLot(ParkingLot lot);
+        Task<MyResponse> PostCarLot(ParkingLot lot);
     }
 }
