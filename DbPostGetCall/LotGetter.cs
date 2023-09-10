@@ -30,7 +30,6 @@ namespace DbPostGetCall
             return cars.ToArray()[0];
         }
 
-
         public async Task<bool> RemoveCarFromLot(int idToDelete)
         {
             using var connection = new NpgsqlConnection(_configuration.GetValue<string>("ConnectionStrings:ConnectionString"));
@@ -46,9 +45,7 @@ namespace DbPostGetCall
 
         public async Task<bool> PostCarLot(ParkingLot lot)
         {
-            
-
-          // string sqlcarInsert = $"INSERT INTO ParkingLots (Id, CarModel, CarNumber, LotNumber) VALUES (@Id, @CarModel, @CarNumber, @LotNumber)";
+           // ParkingLot lot = JsonConvert.DeserializeObject<ParkingLot>(lotJson);
 
             using var connection = new NpgsqlConnection(_configuration.GetValue<string>("ConnectionStrings:ConnectionString"));
 
@@ -62,19 +59,20 @@ namespace DbPostGetCall
 
             return true;
         }
+
+        public async Task<string> GetTakenLot(int carId)
+        {
+            using var connection = new NpgsqlConnection(_configuration.GetValue<string>("ConnectionStrings:ConnectionString"));
+
+            var cars = await connection.QueryAsync<string>("SELECT json_agg(parkingLots) FROM parkingLots WHERE Id  = @Id",
+                new { Id = carId });
+
+            if (cars == null)
+            {
+                return "Null or empty";
+            }
+
+            return cars.ToArray()[0];
+        }
     }
 }
-
-        //public async Task<ParkingLot> GetTakenLot(int id)
-        //{
-        //    using var connection = new NpgsqlConnection(_configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-        //
-        //    var car = await connection.QueryAsync<ParkingLot>("SELECT * FROM ParkingLots WHERE Id = @Id", new { Id = id});
-        //
-        //    if (car == null)
-        //    {
-        //        return new ParkingLot();
-        //    }
-        //
-        //    return (ParkingLot)car;
-        //}

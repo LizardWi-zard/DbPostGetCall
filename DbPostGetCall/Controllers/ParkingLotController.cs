@@ -1,6 +1,8 @@
 using Dapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Npgsql;
 using System.Net;
 
@@ -19,55 +21,43 @@ namespace DbPostGetCall.Controllers
             _getLot = getLot ?? throw new ArgumentNullException(nameof(getLot));
         }
 
-        [HttpGet(Name = "Cars")]
+        [HttpGet(Name = "All")]
         public async Task<ActionResult<string>> GetCars()
         {
-            Console.WriteLine("Get another method call");
-
-
             var models = await _getLot.GetCars();
+            return models;
+        }
+
+        [HttpGet("{carId}", Name = "Single")]
+        public async Task<ActionResult<string>> GetCar(int carId)
+        {
+            var models = await _getLot.GetTakenLot(carId);
             return Ok(models);
         }
 
-        [HttpPost(Name = "ItemsToDB")]
-        public async Task<ActionResult<bool>> AddCarToDb()
-        {
-            int newCarId = Random.Shared.Next(1, 100);
-            string newCarModel = "Honda";
-            int newCarNumber = Random.Shared.Next(1000, 10000);
-            int newLotNumber = Random.Shared.Next(1, 2000);
+        //[HttpPost()]
+        //public async Task<OkResult> AddCarToDb(int id, string model, int carNumber, int lotNumber)
+        //{
+        //    var newLot = new ParkingLot() { Id = id, CarModel = model, CarNumber = carNumber, LotNumber = lotNumber };
+        //
+        //    await _getLot.PostCarLot(newLot);
+        //    return Ok();
+        //}
 
-            ParkingLot newLot = new ParkingLot();
-            newLot.Id = newCarId;
-            newLot.CarModel = newCarModel;
-            newLot.CarNumber = newCarNumber;
-            newLot.LotNumber = newLotNumber;
+        [HttpPost()]
+        public async Task<OkResult> AddCarToDb(string json)
+        {
+            ParkingLot newLot = JsonConvert.DeserializeObject<ParkingLot>(json);
 
             await _getLot.PostCarLot(newLot);
-            return true;
-
+            return Ok();
         }
 
-        [HttpDelete("{carId}", Name = "DeleteCar")]
+        [HttpDelete("{carId}", Name = "Delete")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<bool>> DeleteDiscount(int carId)
         {
             return Ok(await _getLot.RemoveCarFromLot(carId));
         }
-
     }
 }
-
-
-//  [HttpGet(Name = "GetTakenLots")]
-//  public IEnumerable<ParkingLot> Get()
-//  {
-//      return Enumerable.Range(1, 5).Select(index => new ParkingLot
-//      {
-//          Id = Random.Shared.Next(1, 100),
-//          CarModel = "Nissan", 
-//          CarNumber = Random.Shared.Next(1000, 10000),
-//          LotNumber = Random.Shared.Next(1, 2000)
-//      })
-//      .ToArray();
-//  }
